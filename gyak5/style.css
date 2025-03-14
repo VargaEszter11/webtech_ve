@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    text-align: left;
+}
+
+h1 {
+    color: #333;
+}
+
+.input-container {
+    margin-bottom: 20px;
+}
+
+#taskInput {
+    padding: 10px;
+    font-size: 16px;
+    width: 300px;
+    margin-right: 10px;
+}
+
+#addButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #df06f3;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#addButton:hover {
+    background-color: #df06f3;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #fff;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+li:hover {
+    background-color: #f0f0f0;
+}
+
+li.completed {
+    text-decoration: line-through;
+    color: #888;
+}
