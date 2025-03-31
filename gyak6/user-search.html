@@ -32,9 +32,9 @@
                     for (const user of data.items) {
                         const userHtml = `
                         <div class="card">
-                            <img src="${user.avatar_url}" alt="${user.login}">
+                            <img src="${user.avatar_url}" alt="${user.login}" style="width:50px; border-radius:50%;">
                             <h4>${user.login}</h4>
-                            <a href="${user.html_url}" target="_blank">Profil megnyitása</a>
+                            <a href="user.html?id=${user.login}" target="_blank">Profil megnyitása</a>
                         </div>`;
                         resultDiv.innerHTML += userHtml;
                     }
@@ -54,3 +54,4 @@
     </script>
 </body>
 </html>
+

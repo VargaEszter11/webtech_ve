@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Felhasználói Adatlap</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Felhasználói Adatlap</h1>
+        <div id="user-profile" class="card"></div>
+    </div>
+
+    <script>
+        function fetchUserData() {
+            const params = new URLSearchParams(window.location.search);
+            const userId = params.get('id');
+            if (!userId) {
+                document.getElementById('user-profile').innerHTML = '<p>Nem található felhasználó.</p>';
+                return;
+            }
+            
+            try {
+                const response = fetch(`https://api.github.com/users/${userId}`);
+                if (!response.ok) throw new Error('Hiba a felhasználói adatok lekérésekor');
+                const user = response.json();
+                
+                let userHTML = `<h2>${user.name || user.login}</h2>`;
+                if (user.avatar_url) {
+                    userHTML += `<img src="${user.avatar_url}" alt="${user.login}" style="width:100px; border-radius:50%;">`;
+                }
+                if (user.blog) {
+                    userHTML += `<p><strong>Blog:</strong> <a href="${user.blog}" target="_blank">${user.blog}</a></p>`;
+                }
+                if (user.location) {
+                    userHTML += `<p><strong>Hely:</strong> ${user.location}</p>`;
+                }
+                if (user.bio) {
+                    userHTML += `<p><strong>Bio:</strong> ${user.bio}</p>`;
+                }
+                if (user.public_repos) {
+                    userHTML += `<p><strong>Publikus repók:</strong> ${user.public_repos}</p>`;
+                }
+                if (user.followers) {
+                    userHTML += `<p><strong>Követők:</strong> ${user.followers}</p>`;
+                }
+                
+                document.getElementById('user-profile').innerHTML = userHTML;
+            } catch (error) {
+                document.getElementById('user-profile').innerHTML = '<p>Hiba történt az adatok lekérése közben.</p>';
+            }
+        }
+
+        fetchUserData();
+    </script>
+</body>
+</html>
