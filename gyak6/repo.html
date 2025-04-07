@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repo adatlap</title>
+    <link rel="stylesheet" href="style.css" /> 
+</head>
+<body>
+    <button id="favorite-btn" class="btn btn-primary">Kedvencnek jelöl</button>
+    <h4 id="name"></h4>
+    <p id="description"></p>
+    <p id="homepage"></p>
+
+    <div class="container">
+        <div class="col">
+            <h4>Files</h4>
+            <table id="file-list">
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Size</th>
+                </tr>
+            </table>
+        </div>
+        <div class="col">
+            <h4>Latest issues</h4>
+            <ul id="issues"></ul>
+        </div>
+    </div>
+
+    <script src = "app.js"></script>
+    <script>
+        const FAVORITES_KEY = 'github_favorites';
+        
+        function getFavorites() {
+            const favorites = localStorage.getItem(FAVORITES_KEY);
+            return favorites ? JSON.parse(favorites) : [];
+        }
+
+        function isFavorite(repoName) {
+            return getFavorites().includes(repoName);
+        }
+
+        function toggleFavorite(repoName) {
+            const favorites = getFavorites();
+            const index = favorites.indexOf(repoName);
+            
+            if (index === -1) {
+                favorites.push(repoName);
+            } else {
+                favorites.splice(index, 1);
+            }
+            
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+            return index === -1;
+        }
+
+        function updateFavoriteButton(repoName) {
+            const btn = document.getElementById('favorite-btn');
+            const isFav = isFavorite(repoName);
+            
+            btn.textContent = isFav ? 'Kedvenc eltávolítása' : 'Kedvencnek jelöl';
+            btn.className = isFav ? 'favorited' : '';
+        }
+
+        async function loadRepo(repoName) {
+            try {
+                const res = await fetch('https://api.github.com/repos/' + repoName, {
+                    headers: {
+                        'Authorization': 'Bearer ' + GITHUB_ACCESS_TOKEN
+                    }
+                });
+
+                if (!res.ok) throw 'Server error occurred, status code: ' + res.status;
+
+                const data = await res.json();
+                document.querySelector('#name').textContent = data.full_name;
+                document.querySelector('#description').textContent = data.description;
+
+                if (data.homepage) {
+                    document.querySelector('#homepage').innerHTML = `
+                        <strong>Homepage:</strong>
+                        <a href="${data.homepage}">${data.homepage}</a>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                if (typeof err === 'string') alert(err);
+            }
+        }
+
+        async function loadFiles(repoName) {
+            try {
+                const res = await fetch(`https://api.github.com/repos/${repoName}/contents/`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + GITHUB_ACCESS_TOKEN
+                    }
+                });
+
+                if (!res.ok) throw 'Server error occurred, status code: ' + res.status;
+
+                const data = await res.json();
+                const tableElem = document.querySelector('#file-list');
+
+                data.forEach(file => {
+                    tableElem.innerHTML += `
+                        <tr>
+                            <td>${file.name}</td>
+                            <td>${file.type}</td>
+                            <td>${file.size || '-'} bytes</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadIssues(repoName) {
+            try {
+                const res = await fetch(`https://api.github.com/repos/${repoName}/issues`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + GITHUB_ACCESS_TOKEN
+                    }
+                });
+
+                if (!res.ok) throw 'Server error occurred, status code: ' + res.status;
+
+                const data = await res.json();
+                const issuesList = document.querySelector('#issues');
+
+                data.forEach(issue => {
+                    issuesList.innerHTML += `<li>${issue.title}</li>`;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const repoName = params.get('name');
+
+        if (!repoName) {
+            window.location = 'index.html';
+        } else {
+            loadRepo(repoName);
+            loadFiles(repoName);
+            loadIssues(repoName);
+            
+            updateFavoriteButton(repoName);
+            document.getElementById('favorite-btn').addEventListener('click', () => {
+                const isNowFavorite = toggleFavorite(repoName);
+                updateFavoriteButton(repoName);
+                alert(isNowFavorite ? 'Hozzáadva a kedvencekhez!' : 'Eltávolítva a kedvencekből!');
+            });
+        }
+    </script>
+</body>
+</html>

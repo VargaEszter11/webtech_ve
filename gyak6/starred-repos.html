@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kedvenc repository-k</title>
+  <link rel="stylesheet" href="style.css" /> 
+</head>
+<body>
+  <div class="container">
+    <h1>Kedvenc repository-k</h1>
+    <div id="repo-list" class="row">
+      <p>Betöltés...</p>
+    </div>
+  </div>
+
+  <script src = "app.js"></script>
+  <script>
+    const token = GITHUB_ACCESS_TOKEN;
+    const repoList = document.getElementById("repo-list");
+
+    if (!token) {
+      repoList.innerHTML = "<p class='col'>Nem vagy bejelentkezve.</p>";
+    } else {
+      fetch("https://api.github.com/user/starred", {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json"
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Hiba a lekérdezés során.");
+        return response.json();
+      })
+      .then(data => {
+        repoList.innerHTML = "";
+        if (data.length === 0) {
+          repoList.innerHTML = "<p class='col'>Nincsenek csillagozott repository-k.</p>";
+        } else {
+          data.forEach(repo => {
+            const card = document.createElement("div");
+            card.className = "card col-4";
+
+            const link = document.createElement("a");
+            link.href = `repo.html?name=${repo.full_name}`;
+            link.textContent = repo.full_name;
+
+            card.appendChild(link);
+            repoList.appendChild(card);
+          });
+        }
+      })
+      .catch(error => {
+        repoList.innerHTML = `<p class='col'>Hiba: ${error.message}</p>`;
+      });
+    }
+  </script>
+</body>
+</html>
